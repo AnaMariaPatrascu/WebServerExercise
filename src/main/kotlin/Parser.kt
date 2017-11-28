@@ -15,7 +15,7 @@ class Parser {
 
 			HttpRequest(firstLine!!.method, firstLine.uri, firstLine.httpVersion, headers, body)
 		} catch (e: Exception) {
-			null
+			throw e
 		}
 	}
 

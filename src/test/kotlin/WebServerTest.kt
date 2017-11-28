@@ -7,7 +7,7 @@ class WebServerTest {
 
     @Before
     fun setUp() {
-        server.start(0)
+        server.start()
     }
 
     @After

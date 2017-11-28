@@ -1,25 +1,20 @@
-import java.net.ServerSocket
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
+import java.net.*
+import java.util.concurrent.*
 
 class WebServer {
-
     private val executor: ExecutorService = Executors.newCachedThreadPool()
-    private lateinit var serverSocket: ServerSocket
+    private var serverSocket: ServerSocket = ServerSocket(0)
 
     fun getPort(): Int {
         return serverSocket.localPort
     }
 
-    fun start(port: Int) {
-        serverSocket = ServerSocket(port)
-
+    fun start() {
         executor.execute {
             while (!serverSocket.isClosed) {
                 try {
                     val socket = serverSocket.accept()
-                    executor.execute(RequestHandler(socket))
+                    executor.execute(ClientHandler(socket))
                 } catch (e: Exception) {
                     println("Client connection failed: $e")
                 }
@@ -27,19 +22,13 @@ class WebServer {
         }
     }
 
-
     fun stop() {
         serverSocket.close()
-
-        executor.shutdown()
-        if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
-            executor.shutdownNow()
-            executor.awaitTermination(30, TimeUnit.SECONDS)
-        }
+        executor.shutdownNow()
     }
 }
 
 fun main(args: Array<String>) {
     val server = WebServer()
-    server.start(8080)
+    server.start()
 }

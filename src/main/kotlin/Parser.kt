@@ -1,5 +1,4 @@
 import java.io.*
-import java.net.*
 
 class Parser {
 	fun parseRequest(input: InputStream): HttpRequest? {
@@ -9,9 +8,7 @@ class Parser {
 			val firstLine = parseFirstLine(reader)
 			val headers = parseHeaders(reader)
 			reader.lines().skip(1)
-			val body = parseBody(reader, headers.get("Content-Length")?.toInt() ?: 0)
-
-			//todo additional check if GET must have body != null...etc.
+			val body = parseBody(reader, headers.get("Content-Length")?.replace(" ", "")?.toInt() ?: 0)
 
 			HttpRequest(firstLine!!.method, firstLine.uri, firstLine.httpVersion, headers, body)
 		} catch (e: Exception) {
@@ -27,7 +24,7 @@ class Parser {
 			}
 
 			var method = HttpMethod.valueOf(firstLine[0])
-			var uri = URL(firstLine[1])
+			var uri = firstLine[1]//URL(firstLine[1])
 
 			val httpVersion = firstLine[2]
 			if (httpVersion != "HTTP/1.1") {
@@ -45,8 +42,8 @@ class Parser {
 		reader.lineSequence()
 				.takeWhile { it.isNotBlank() }
 				.forEach {
-					val elements = it.split(':')
-					if (elements.size != 2) {
+					val elements = it.split(":".toRegex(), 2)
+					if (elements.size < 2) {
 						throw IllegalArgumentException("$it header does not have expected format Name: Value")
 					}
 					headers.put(elements[0], elements[1])
@@ -67,5 +64,5 @@ class Parser {
 }
 
 data class FirstRequestLine(val method: HttpMethod,
-							val uri: URL,
+							val uri: String,
 							val httpVersion: String)

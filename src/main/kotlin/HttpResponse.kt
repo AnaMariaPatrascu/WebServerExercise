@@ -8,8 +8,17 @@ class HttpResponse(private val httpVersion: String,
 
     fun writeTo(output: OutputStream) {
         with(output.writer()) {
-            write("$httpVersion $statusCode $statusDescription $headers \r\n $body")
+            write(toHttpString())
             flush()
+        }
+    }
+
+    private fun toHttpString(): String {
+        return buildString {
+            append("$httpVersion $statusCode $statusDescription\r\n")
+            headers.forEach { append("${it.key}:${it.value}\r\n") }
+            append("\r\n")
+            append(body)
         }
     }
 }

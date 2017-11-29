@@ -7,8 +7,7 @@ class ClientHandler(private val socket: Socket) : Runnable {
 
 	override fun run() {
 		val request = parser.parseRequest(socket.getInputStream())
-		val response = if (request != null) interpreter.interpretRequest(request)
-								   else HttpResponse("HTTP/1.1", 400, "Bad Request", mapOf(), null)
+		val response = interpreter.interpretRequest(request)
 		try {
 			response.writeTo(socket.getOutputStream())
 		} catch (e: IOException) {

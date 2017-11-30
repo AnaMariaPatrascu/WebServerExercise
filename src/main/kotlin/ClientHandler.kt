@@ -6,7 +6,12 @@ class ClientHandler(private val socket: Socket) : Runnable {
 	private val interpreter = RequestInterpreter()
 
 	override fun run() {
-		val request = parser.parseRequest(socket.getInputStream())
+		val request = try {
+			parser.parseRequest(socket.getInputStream())
+		}catch (e: IllegalArgumentException){
+			null
+		}
+
 		val response = interpreter.interpretRequest(request)
 		try {
 			response.writeTo(socket.getOutputStream())

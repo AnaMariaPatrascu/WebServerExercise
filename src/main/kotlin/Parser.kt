@@ -23,8 +23,8 @@ class Parser {
 				throw IllegalArgumentException("First request line should contain three parameters!")
 			}
 
-			var method = HttpMethod.valueOf(firstLine[0])
-			var uri = firstLine[1]//URL(firstLine[1])
+			val method = HttpMethod.valueOf(firstLine[0])
+			val uri = firstLine[1]
 
 			val httpVersion = firstLine[2]
 			if (httpVersion != "HTTP/1.1") {
@@ -38,7 +38,7 @@ class Parser {
 	}
 
 	private fun parseHeaders(reader: BufferedReader): Map<String, String> {
-		var headers = mutableMapOf<String, String>()
+		val headers = mutableMapOf<String, String>()
 		reader.lineSequence()
 				.takeWhile { it.isNotBlank() }
 				.forEach {

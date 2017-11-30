@@ -7,7 +7,7 @@ class RequestInterpreter {
 		return if(request.method == HttpMethod.GET && request.URI == "/hello") {
 			HttpResponse("HTTP/1.1", 200, "OK", mapOf(),
 					"Hello World!")
-		}else if(request.method == HttpMethod.GET && request.URI != null) {
+		}else if(request.method == HttpMethod.GET) {
 			HttpResponse("HTTP/1.1", 200, "OK", mapOf(),
 					"Hello ${request.URI.substring(1)}!")
 		}else {

@@ -5,7 +5,8 @@ const val DEFAULT_PORT = 8080
 
 class WebServer(port: Int = DEFAULT_PORT,
 				private val requestParser: RequestParser,
-				private val requestInterpreter: RequestInterpreter) {
+				private val requestInterpreter: RequestInterpreter,
+				private val pathMapper: PathMapper) {
 
     private val executor: ExecutorService = Executors.newCachedThreadPool()
     private var serverSocket: ServerSocket = ServerSocket(port)
@@ -19,7 +20,7 @@ class WebServer(port: Int = DEFAULT_PORT,
             while (!serverSocket.isClosed) {
                 try {
                     val socket = serverSocket.accept()
-                    executor.execute(ClientHandler(socket, requestParser, requestInterpreter))
+                    executor.execute(ClientHandler(socket, requestParser, requestInterpreter, pathMapper))
                 } catch (e: Exception) {
                     println("Client connection failed: $e")
                 }
@@ -42,6 +43,10 @@ fun main(args: Array<String>) {
     val interpreter = HttpRequestInterpreter()
 	val port = 8081
 
-    val server = WebServer(port, requestParser = parser, requestInterpreter = interpreter)
+	val mapper = PathMapper()
+	mapper.add("/hello", "Hello world!")
+	mapper.add("/ana", "Hello Ana!")
+
+    val server = WebServer(port, requestParser = parser, requestInterpreter = interpreter, pathMapper = mapper)
     server.start()
 }

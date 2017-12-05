@@ -3,12 +3,13 @@ import java.net.*
 
 class ClientHandler(private val socket: Socket,
 					private val requestParser: RequestParser,
-					private val interpreter: RequestInterpreter) : Runnable {
+					private val interpreter: RequestInterpreter,
+					private val pathMapper: PathMapper) : Runnable {
 
 	override fun run() {
 		var response = try {
 			val request = requestParser.parseRequest(socket.getInputStream())
-			interpreter.interpretRequest(request)
+			interpreter.interpretRequest(request, pathMapper)
 		}catch (e: HttpRequestParseException){
 			HttpResponse("HTTP/1.1", 400, "Bad Request", mapOf(), null)
 		} catch (e: Exception) {

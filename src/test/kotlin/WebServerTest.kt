@@ -3,7 +3,7 @@ import java.net.*
 
 class WebServerTest {
 
-	private val server = WebServer()
+	private val server = WebServer(8081, HttpRequestParser(), HttpRequestInterpreter())
 //
 //    @Before
 //    fun setUp() {

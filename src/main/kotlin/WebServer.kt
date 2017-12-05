@@ -1,9 +1,14 @@
 import java.net.*
 import java.util.concurrent.*
 
-class WebServer {
+const val DEFAULT_PORT = 8080
+
+class WebServer(port: Int = DEFAULT_PORT,
+				private val requestParser: RequestParser,
+				private val requestInterpreter: RequestInterpreter) {
+
     private val executor: ExecutorService = Executors.newCachedThreadPool()
-    private var serverSocket: ServerSocket = ServerSocket(0)
+    private var serverSocket: ServerSocket = ServerSocket(port)
 
     fun getPort(): Int {
         return serverSocket.localPort
@@ -14,7 +19,7 @@ class WebServer {
             while (!serverSocket.isClosed) {
                 try {
                     val socket = serverSocket.accept()
-                    executor.execute(ClientHandler(socket))
+                    executor.execute(ClientHandler(socket, requestParser, requestInterpreter))
                 } catch (e: Exception) {
                     println("Client connection failed: $e")
                 }
@@ -23,12 +28,20 @@ class WebServer {
     }
 
     fun stop() {
-        serverSocket.close()
-        executor.shutdownNow()
+        try {
+            serverSocket.close()
+            executor.shutdownNow()
+        } catch (e: Exception) {
+            println("Closing server failed: $e")
+        }
     }
 }
 
 fun main(args: Array<String>) {
-    val server = WebServer()
+    val parser = HttpRequestParser()
+    val interpreter = HttpRequestInterpreter()
+	val port = 8081
+
+    val server = WebServer(port, requestParser = parser, requestInterpreter = interpreter)
     server.start()
 }

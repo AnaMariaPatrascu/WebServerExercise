@@ -1,18 +1,20 @@
 import java.io.*
 import java.net.*
 
-class ClientHandler(private val socket: Socket) : Runnable {
-	private val parser = Parser()
-	private val interpreter = RequestInterpreter()
+class ClientHandler(private val socket: Socket,
+					private val requestParser: RequestParser,
+					private val interpreter: RequestInterpreter) : Runnable {
 
 	override fun run() {
-		val request = try {
-			parser.parseRequest(socket.getInputStream())
-		}catch (e: IllegalArgumentException){
-			null
+		var response = try {
+			val request = requestParser.parseRequest(socket.getInputStream())
+			interpreter.interpretRequest(request)
+		}catch (e: HttpRequestParseException){
+			HttpResponse("HTTP/1.1", 400, "Bad Request", mapOf(), null)
+		} catch (e: Exception) {
+			HttpResponse("HTTP/1.1", 500, "Internal Server Error", mapOf(), null)
 		}
 
-		val response = interpreter.interpretRequest(request)
 		try {
 			response.writeTo(socket.getOutputStream())
 		} catch (e: IOException) {

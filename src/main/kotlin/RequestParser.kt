@@ -1,26 +1,27 @@
 import java.io.*
 
-class Parser {
-	fun parseRequest(input: InputStream): HttpRequest? {
-		return try {
-			val reader = input.bufferedReader()
+interface RequestParser {
+	fun parseRequest(input: InputStream): HttpRequest
+}
 
-			val firstLine = parseFirstLine(reader)
-			val headers = parseHeaders(reader)
-			reader.lines().skip(1)
-			val body = parseBody(reader, headers.get("Content-Length")?.replace(" ", "")?.toInt() ?: 0)
+class HttpRequestParser : RequestParser {
 
-			HttpRequest(firstLine!!.method, firstLine.uri, firstLine.httpVersion, headers, body)
-		} catch (e: Exception) {
-			throw e
-		}
+	override fun parseRequest(input: InputStream): HttpRequest {
+		val reader = input.bufferedReader()
+
+		val firstLine = parseFirstLine(reader)
+		val headers = parseHeaders(reader)
+		reader.lines().skip(1)
+		val body = parseBody(reader, headers.get("Content-Length")?.replace(" ", "")?.toInt() ?: 0)
+
+		return HttpRequest(firstLine!!.method, firstLine.uri, firstLine.httpVersion, headers, body)
 	}
 
 	private fun parseFirstLine(reader: BufferedReader): FirstRequestLine? {
 		try {
 			val firstLine = reader.lines().findFirst().get().split(' ')
 			if (firstLine.size != 3) {
-				throw IllegalArgumentException("First request line should contain three parameters!")
+				throw HttpRequestParseException("First request line should contain three parameters!")
 			}
 
 			val method = HttpMethod.valueOf(firstLine[0])
@@ -28,12 +29,12 @@ class Parser {
 
 			val httpVersion = firstLine[2]
 			if (httpVersion != "HTTP/1.1") {
-				throw IllegalArgumentException("$httpVersion is not a valid http version!")
+				throw HttpRequestParseException("$httpVersion is not a valid http version!")
 			}
 
 			return FirstRequestLine(method, uri, httpVersion)
 		} catch (e: Exception) {
-			throw IllegalArgumentException("First request line does not fit to the http format!")
+			throw HttpRequestParseException("First request line does not fit to the http format! ${e.message}")
 		}
 	}
 
@@ -44,7 +45,7 @@ class Parser {
 				.forEach {
 					val elements = it.split(":".toRegex(), 2)
 					if (elements.size < 2) {
-						throw IllegalArgumentException("$it header does not have expected format Name: Value")
+						throw HttpRequestParseException("$it header does not have expected format Name: Value")
 					}
 					headers.put(elements[0], elements[1])
 				}
@@ -66,3 +67,5 @@ class Parser {
 data class FirstRequestLine(val method: HttpMethod,
 							val uri: String,
 							val httpVersion: String)
+
+class HttpRequestParseException(override var message: String): RuntimeException()

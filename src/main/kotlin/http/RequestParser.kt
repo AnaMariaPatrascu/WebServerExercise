@@ -1,3 +1,5 @@
+package http
+
 import java.io.*
 
 interface RequestParser {

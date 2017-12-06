@@ -1,3 +1,5 @@
+package http
+
 enum class HttpMethod {
 	GET, PUT, POST, PATCH, TRACE, OPTIONS, DELETE, CONNECT, HEAD
 }

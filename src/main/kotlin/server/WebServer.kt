@@ -1,11 +1,14 @@
+package server
+
+import http.*
 import java.net.*
 import java.util.concurrent.*
 
 const val DEFAULT_PORT = 8080
 
 class WebServer(port: Int = DEFAULT_PORT,
-				private val requestParser: RequestParser,
-				private val requestInterpreter: RequestInterpreter) {
+                private val requestParser: RequestParser,
+                private val requestHandler: RequestHandler) {
 
     private val executor: ExecutorService = Executors.newCachedThreadPool()
     private var serverSocket: ServerSocket = ServerSocket(port)
@@ -19,9 +22,9 @@ class WebServer(port: Int = DEFAULT_PORT,
             while (!serverSocket.isClosed) {
                 try {
                     val socket = serverSocket.accept()
-                    executor.execute(ClientHandler(socket, requestParser, requestInterpreter))
+                    executor.execute(ClientHandler(socket, requestParser, requestHandler))
                 } catch (e: Exception) {
-                    println("Client connection failed: $e")
+                    println("Something went wrong: $e")
                 }
             }
         }
@@ -35,17 +38,4 @@ class WebServer(port: Int = DEFAULT_PORT,
             println("Closing server failed: $e")
         }
     }
-}
-
-fun main(args: Array<String>) {
-    val parser = HttpRequestParser()
-    val interpreter = HttpRequestInterpreter()
-	val port = 8081
-
-    interpreter.addNewRoute("/hello", RouteContentHelloWorld())
-    interpreter.addNewRoute("/ana", RouteContentHelloAna())
-    interpreter.addNewRoute("/html", RouteContentHtml())
-
-    val server = WebServer(port, requestParser = parser, requestInterpreter = interpreter)
-    server.start()
 }

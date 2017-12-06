@@ -1,43 +1,24 @@
-import java.util.concurrent.*
+package application
 
-interface RequestInterpreter {
-	fun interpretRequest(request: HttpRequest): HttpResponse
-}
+import server.*
+import http.*
 
-class HttpRequestInterpreter : RequestInterpreter {
+fun main(args: Array<String>) {
+	val parser = HttpRequestParser()
+	val interpreter = HttpRequestHandler()
+	val port = 8081
 
-	private val routesMap = ConcurrentHashMap<String, RouteContent>()
+	interpreter.addNewRoute("/hello", RouteContentHelloWorld())
+	interpreter.addNewRoute("/ana", RouteContentHelloAna())
+	interpreter.addNewRoute("/html", RouteContentHtml())
 
-	//addPath or submitPath or submitNewRoute
-	fun addNewRoute(key: String, value: RouteContent) {
-		routesMap.put(key, value)
-	}
-
-	override fun interpretRequest(request: HttpRequest): HttpResponse {
-		return when (request.method) {
-			HttpMethod.GET -> handleGet(request)
-			else -> HttpResponse("HTTP/1.1", 501, "Not Implemented", mapOf(), null)
-		}
-	}
-
-	private fun handleGet(request: HttpRequest): HttpResponse{
-		val routeContent = routesMap[request.URI]
-		return routeContent?.customizedRouteContent(request) ?: HttpResponse("HTTP/1.1", 404, "Not Found", mapOf(), null)
-	}
-}
-
-enum class ContentType (val type: String) {
-	HTMl("text/html"),
-	PLAIN("text/plain")
-}
-
-interface RouteContent {
-	fun customizedRouteContent(request: HttpRequest): HttpResponse
+	val server = WebServer(port, requestParser = parser, requestHandler = interpreter)
+	server.start()
 }
 
 class RouteContentHelloWorld : RouteContent {
 	override fun customizedRouteContent(request: HttpRequest): HttpResponse {
-		val bodyMessage = "Hello world!"
+		val bodyMessage = "Hello, World!"
 		val contentType = ContentType.PLAIN
 
 		return HttpResponse("HTTP/1.1",
@@ -50,7 +31,7 @@ class RouteContentHelloWorld : RouteContent {
 
 class RouteContentHelloAna : RouteContent {
 	override fun customizedRouteContent(request: HttpRequest): HttpResponse {
-		val bodyMessage = "Hello Ana!"
+		val bodyMessage = "Hello, Ana!"
 		val contentType = ContentType.PLAIN
 
 		return HttpResponse("HTTP/1.1",

@@ -1,3 +1,5 @@
+package http
+
 import java.io.OutputStream
 
 class HttpResponse(private val httpVersion: String,

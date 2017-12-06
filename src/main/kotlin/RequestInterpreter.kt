@@ -15,21 +15,14 @@ class HttpRequestInterpreter : RequestInterpreter {
 
 	override fun interpretRequest(request: HttpRequest): HttpResponse {
 		return when (request.method) {
-			HttpMethod.GET -> handleGet(request.URI)
+			HttpMethod.GET -> handleGet(request)
 			else -> HttpResponse("HTTP/1.1", 501, "Not Implemented", mapOf(), null)
 		}
 	}
 
-	private fun handleGet(uri: String): HttpResponse{
-		val routeContent = routesMap[uri]
-		val bodyMessage = routeContent?.content
-
-		return if (bodyMessage.isNullOrEmpty())  HttpResponse("HTTP/1.1", 404, "Not Found", mapOf(), null)
-			else  HttpResponse("HTTP/1.1",
-				200,
-				"OK",
-				mapOf(Pair("Content-Lenght", "${bodyMessage?.length}"), Pair("Content-Type", routeContent?.contentType?.type ?: "text/plain")),
-				bodyMessage)
+	private fun handleGet(request: HttpRequest): HttpResponse{
+		val routeContent = routesMap[request.URI]
+		return routeContent?.customizedRouteContent(request) ?: HttpResponse("HTTP/1.1", 404, "Not Found", mapOf(), null)
 	}
 }
 
@@ -38,4 +31,45 @@ enum class ContentType (val type: String) {
 	PLAIN("text/plain")
 }
 
-data class RouteContent(val content: String, val contentType: ContentType)
+interface RouteContent {
+	fun customizedRouteContent(request: HttpRequest): HttpResponse
+}
+
+class RouteContentHelloWorld : RouteContent {
+	override fun customizedRouteContent(request: HttpRequest): HttpResponse {
+		val bodyMessage = "Hello world!"
+		val contentType = ContentType.PLAIN
+
+		return HttpResponse("HTTP/1.1",
+				200,
+				"OK",
+				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
+				bodyMessage)
+	}
+}
+
+class RouteContentHelloAna : RouteContent {
+	override fun customizedRouteContent(request: HttpRequest): HttpResponse {
+		val bodyMessage = "Hello Ana!"
+		val contentType = ContentType.PLAIN
+
+		return HttpResponse("HTTP/1.1",
+				200,
+				"OK",
+				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
+				bodyMessage)
+	}
+}
+
+class RouteContentHtml : RouteContent {
+	override fun customizedRouteContent(request: HttpRequest): HttpResponse {
+		val bodyMessage = "<html><body><h1>Hello, World!</h1></body></html>"
+		val contentType = ContentType.HTMl
+
+		return HttpResponse("HTTP/1.1",
+				200,
+				"OK",
+				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
+				bodyMessage)
+	}
+}

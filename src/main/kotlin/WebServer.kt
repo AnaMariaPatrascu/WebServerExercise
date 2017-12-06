@@ -42,9 +42,9 @@ fun main(args: Array<String>) {
     val interpreter = HttpRequestInterpreter()
 	val port = 8081
 
-    interpreter.addNewRoute("/hello", RouteContent("Hello world!", ContentType.PLAIN))
-    interpreter.addNewRoute("/ana", RouteContent("Hello Ana!", ContentType.PLAIN))
-    interpreter.addNewRoute("/html", RouteContent("<html><body><h1>Hello, World!</h1></body></html>", ContentType.HTMl))
+    interpreter.addNewRoute("/hello", RouteContentHelloWorld())
+    interpreter.addNewRoute("/ana", RouteContentHelloAna())
+    interpreter.addNewRoute("/html", RouteContentHtml())
 
     val server = WebServer(port, requestParser = parser, requestInterpreter = interpreter)
     server.start()

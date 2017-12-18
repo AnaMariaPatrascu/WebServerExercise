@@ -2,6 +2,7 @@ package application
 
 import server.*
 import http.*
+import java.io.*
 
 fun main(args: Array<String>) {
 	val parser = HttpRequestParser()
@@ -25,7 +26,7 @@ class RouteContentHelloWorld : RouteContent {
 				200,
 				"OK",
 				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
-				bodyMessage)
+				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
 	}
 }
 
@@ -38,7 +39,7 @@ class RouteContentHelloAna : RouteContent {
 				200,
 				"OK",
 				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
-				bodyMessage)
+				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
 	}
 }
 
@@ -51,6 +52,6 @@ class RouteContentHtml : RouteContent {
 				200,
 				"OK",
 				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
-				bodyMessage)
+				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
 	}
 }

@@ -1,16 +1,17 @@
 package http
 
-import java.io.OutputStream
+import java.io.*
 
 class HttpResponse(private val httpVersion: String,
                    private val statusCode: Int,
                    private val statusDescription: String,
                    private val headers: Map<String, String> = mapOf(),
-                   private val body: String?) {
+                   private val body: InputStream?) {
 
     fun writeTo(output: OutputStream) {
         with(output.writer()) {
             write(toHttpString())
+            body?.copyTo(output)
             flush()
         }
     }
@@ -20,7 +21,6 @@ class HttpResponse(private val httpVersion: String,
             append("$httpVersion $statusCode $statusDescription\r\n")
             headers.forEach { append("${it.key}:${it.value}\r\n") }
             append("\r\n")
-            append(body)
         }
     }
 }

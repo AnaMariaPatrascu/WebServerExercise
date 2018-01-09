@@ -14,7 +14,21 @@ class WebServer(port: Int = DEFAULT_PORT,
 
 	// how do we deals with errors when we cannot open the server socket?
 	// we should process common errors and give the user a tip how to resolve these issues
+	// ==> i think user should surround crate() call with try catch....but I am not sure if is the best approach...
 	private var serverSocket: ServerSocket = ServerSocket(port)
+
+	companion object {
+		fun create(port: Int, router: Router): WebServer {
+			val parser = HttpRequestParser()
+			val handler = HttpRequestHandler(router)
+			return try{
+				WebServer(port, requestParser = parser, requestHandler = handler)
+			}catch (e: Exception) {
+				println("Failed to create web server instance: ${e.message}")
+				throw e
+			}
+		}
+	}
 
 	// I think a property delegated to `serverSocket.localPort` would be more idiomatic, but that's style :-)
 	fun getPort(): Int {

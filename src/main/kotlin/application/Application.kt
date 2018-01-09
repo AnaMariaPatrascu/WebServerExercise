@@ -6,21 +6,21 @@ import server.*
 import java.io.*
 
 fun main(args: Array<String>) {
-	// parser looks like an implementation detail of the WebServer to me
-	// maybe use a factory method or something similar to create the webserver so the user doesn't need to
-	// create the parser
-	val parser = HttpRequestParser()
+	val router = HttpRouter()
+	router.addNewRoute("/hello", RouteContentHelloWorld())
+	router.addNewRoute("/ana", RouteContentHelloAna())
+	router.addNewRoute("/html", RouteContentHtml())
 
-	// is it an interpreter,  a handler or a router ?
-	val interpreter = HttpRequestHandler()
 	val port = 8081
 
-	interpreter.addNewRoute("/hello", RouteContentHelloWorld())
-	interpreter.addNewRoute("/ana", RouteContentHelloAna())
-	interpreter.addNewRoute("/html", RouteContentHtml())
+	val server = try{
+						WebServer.create(port, router)
+					}catch (e: Exception) {
+						println("Failed to create web server instance: ${e.message}")
+						null
+					}
 
-	val server = WebServer(port, requestParser = parser, requestHandler = interpreter)
-	server.start()
+	server?.start()
 }
 
 class RouteContentHelloWorld : RouteContent {
@@ -32,8 +32,7 @@ class RouteContentHelloWorld : RouteContent {
 				200,
 				"OK",
 			        // typo! maybe typed API so this cannot happen? (this is also true for other parts of this constructor)
-			        // also check the `to` method in kotlin that creates pairs as it enhances readability
-				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
+				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
 				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
 	}
 }
@@ -46,7 +45,7 @@ class RouteContentHelloAna : RouteContent {
 		return HttpResponse("HTTP/1.1",
 				200,
 				"OK",
-				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
+				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
 				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
 	}
 }
@@ -59,7 +58,7 @@ class RouteContentHtml : RouteContent {
 		return HttpResponse("HTTP/1.1",
 				200,
 				"OK",
-				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
+				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
 				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
 	}
 }

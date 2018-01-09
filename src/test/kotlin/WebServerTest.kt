@@ -10,16 +10,14 @@ class WebServerTest {
 
     @Before
     fun setUp() {
-		val parser = HttpRequestParser()
-		val interpreter = HttpRequestHandler()
 		val port = 8083
+		val router = HttpRouter()
+		router.addNewRoute("/hello", RouteContentHelloWorld())
+		router.addNewRoute("/ana", RouteContentHelloAna())
+		router.addNewRoute("/html", RouteContentHtml())
 
-		interpreter.addNewRoute("/hello", RouteContentHelloWorld())
-		interpreter.addNewRoute("/ana", RouteContentHelloAna())
-		interpreter.addNewRoute("/html", RouteContentHtml())
-
-		server = WebServer(port, requestParser = parser, requestHandler = interpreter)
-        server.start()
+		server = WebServer.create(port, router)
+		server.start()
     }
 
     @After

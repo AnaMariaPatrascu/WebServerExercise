@@ -1,19 +1,10 @@
 package http
 
-import java.util.concurrent.*
-
 interface RequestHandler {
 	fun handleRequest(request: HttpRequest): HttpResponse
 }
 
-class HttpRequestHandler : RequestHandler {
-
-	private val routesMap = ConcurrentHashMap<String, RouteContent>()
-
-	//addPath or submitPath or submitNewRoute
-	fun addNewRoute(key: String, value: RouteContent) {
-		routesMap.put(key, value)
-	}
+class HttpRequestHandler(private val router: Router) : RequestHandler {
 
 	override fun handleRequest(request: HttpRequest): HttpResponse {
 		return when (request.method) {
@@ -23,6 +14,7 @@ class HttpRequestHandler : RequestHandler {
 	}
 
 	private fun handleGet(request: HttpRequest): HttpResponse{
+		val routesMap = router.getRoutes()
 		val routeContent = routesMap[request.URI]
 		return routeContent?.customizedRouteContent(request) ?: HttpResponse("HTTP/1.1", 404, "Not Found", mapOf(), null)
 	}

@@ -23,6 +23,12 @@ class ClientHandler(private val socket: Socket,
 			throw Exception("Failed during writing response to output stream $e")
 		} finally {
 			try {
+				// you're implementing HTTP/1.1 which SHOULD not close the connection
+				// from the spec: A significant difference between HTTP/1.1 and earlier versions of HTTP
+				//                is that persistent connections are the default behavior of any HTTP
+				//                connection. That is, unless otherwise indicated, the client SHOULD
+				//                assume that the server will maintain a persistent connection, even
+				//                after error responses from the server.
 				socket.close()
 			}catch (e: IOException){
 				println("Error during closing socket connection $e")

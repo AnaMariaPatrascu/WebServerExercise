@@ -14,9 +14,11 @@ class HttpRequestParser : RequestParser {
 
 		val body = input
 
+		// try to avoid !!
 		return HttpRequest(firstLine!!.method, firstLine.uri, firstLine.httpVersion, headers, body)
 	}
 
+	// does this method have the correct return type?
 	private fun parseFirstLine(input: InputStream): FirstRequestLine? {
 		try {
 			val firstLine = input.readNextLine()
@@ -33,6 +35,7 @@ class HttpRequestParser : RequestParser {
 			val httpVersion = items[2]
 
 			if (httpVersion != "HTTP/1.1") {
+				// actually it could be 1.0, couldn't it? (theoretically even 2.0 even though nobody implemented support for it without TLS)
 				throw HttpRequestParseException("$httpVersion is not a valid http version!")
 			}
 
@@ -72,7 +75,7 @@ class HttpRequestParser : RequestParser {
 fun InputStream.readNextLine(): String {
 	var result = ""
 	while (!result.contains("\n")) {
-		result = "$result${this.read().toChar()}"
+		result = "$result${this.read().toChar()}" // character encoding?
 	}
 	return result.removeSuffix("\n").removeSuffix("\r")
 }

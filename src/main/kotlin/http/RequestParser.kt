@@ -1,5 +1,6 @@
 package http
 
+import mu.*
 import java.io.*
 
 interface RequestParser {
@@ -67,7 +68,8 @@ class HttpRequestParser : RequestParser {
 fun InputStream.readNextLine(): String {
 	var result = ""
 	while (!result.contains("\n")) {
-		result = "$result${this.read().toChar()}"
+		result = "$result${this.read().toChar()}"   //TODO how should I do it using ISO encoding??
+				//read().toChar(Charsets.ISO_8859_1)}"
 	}
 	return result.removeSuffix("\n").removeSuffix("\r")
 }

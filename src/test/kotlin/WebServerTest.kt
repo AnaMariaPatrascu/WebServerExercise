@@ -10,13 +10,12 @@ class WebServerTest {
 
     @Before
     fun setUp() {
-		val port = 8083
-		val router = HttpRouter()
-		router.addNewRoute("/hello", RouteContentHelloWorld())
-		router.addNewRoute("/ana", RouteContentHelloAna())
-		router.addNewRoute("/html", RouteContentHtml())
+		val port = 8087
+		val routes = listOf("/hello" to RouteContentHelloWorld(),
+				"/ana" to RouteContentHelloAna(),
+				"/html" to RouteContentHtml())
 
-		server = WebServer.create(port, router)
+		server = WebServer.create(port, routes )
 		server.start()
     }
 
@@ -80,6 +79,7 @@ class WebServerTest {
 			socket.close()
 		}
 	}
+
 }
 
 class RouteContentHelloWorld : RouteContent {
@@ -91,7 +91,7 @@ class RouteContentHelloWorld : RouteContent {
 				200,
 				"OK",
 				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
-				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
+				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.ISO_8859_1)))
 	}
 }
 
@@ -104,7 +104,7 @@ class RouteContentHelloAna : RouteContent {
 				200,
 				"OK",
 				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
-				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
+				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.ISO_8859_1)))
 	}
 }
 
@@ -117,6 +117,6 @@ class RouteContentHtml : RouteContent {
 				200,
 				"OK",
 				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
-				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
+				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.ISO_8859_1)))
 	}
 }

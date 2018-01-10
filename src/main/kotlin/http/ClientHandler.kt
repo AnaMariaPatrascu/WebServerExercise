@@ -1,11 +1,14 @@
 package http
 
+import mu.*
 import java.io.*
 import java.net.*
 
 class ClientHandler(private val socket: Socket,
 					private val requestParser: RequestParser,
 					private val handler: RequestHandler) : Runnable {
+
+	companion object: KLogging()
 
 	override fun run() {
 		var response = try {
@@ -31,7 +34,7 @@ class ClientHandler(private val socket: Socket,
 				//                after error responses from the server.
 				socket.close()
 			}catch (e: IOException){
-				println("Error during closing socket connection $e")
+				logger.error {"Error during closing socket connection $e"}
 			}
 		}
 	}

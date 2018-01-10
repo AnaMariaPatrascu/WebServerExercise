@@ -1,6 +1,7 @@
 package server
 
 import http.*
+import mu.*
 import java.net.*
 import java.util.concurrent.*
 
@@ -17,16 +18,21 @@ class WebServer(port: Int = DEFAULT_PORT,
 	// ==> i think user should surround crate() call with try catch....but I am not sure if is the best approach...
 	private var serverSocket: ServerSocket = ServerSocket(port)
 
-	companion object {
-		fun create(port: Int, router: Router): WebServer {
+	companion object: KLogging() {
+		fun create(port: Int, routes: List<Pair<String, RouteContent>>): WebServer {
 			val parser = HttpRequestParser()
+
+			val router = HttpRouter()
+			routes.forEach { router.addNewRoute(it.first, it.second) }
+
 			val handler = HttpRequestHandler(router)
-//			try{
-			return WebServer(port, requestParser = parser, requestHandler = handler)
-//			}catch (e: Exception) {
-//				println("Failed to create web server instance: ${e.message}")
-//				throw e
-//			}
+
+			try{
+				return WebServer(port, requestParser = parser, requestHandler = handler)
+			}catch (e: Exception) {
+				logger.error {"Failed to create web server instance: ${e.message}"}
+				throw e
+			}
 		}
 	}
 
@@ -46,7 +52,7 @@ class WebServer(port: Int = DEFAULT_PORT,
 				} catch (e: Exception) {
 					// we should check whether the exception was triggered by closing the server socket
 					// we shouldn't pollute the log with exceptions if it's a normal use case
-					println("Something went wrong: $e")
+					logger.error{"Something went wrong: $e"}
 					// --> use a logger...
 				}
 			}
@@ -58,7 +64,7 @@ class WebServer(port: Int = DEFAULT_PORT,
 			serverSocket.close()
 			executor.shutdownNow()
 		} catch (e: Exception) {
-			println("Closing server failed: $e")
+			logger.error{"Closing server failed: $e"}
 		}
 	}
 }

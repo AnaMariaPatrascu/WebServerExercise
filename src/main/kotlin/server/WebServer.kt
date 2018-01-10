@@ -21,12 +21,12 @@ class WebServer(port: Int = DEFAULT_PORT,
 		fun create(port: Int, router: Router): WebServer {
 			val parser = HttpRequestParser()
 			val handler = HttpRequestHandler(router)
-			return try{
-				WebServer(port, requestParser = parser, requestHandler = handler)
-			}catch (e: Exception) {
-				println("Failed to create web server instance: ${e.message}")
-				throw e
-			}
+//			try{
+			return WebServer(port, requestParser = parser, requestHandler = handler)
+//			}catch (e: Exception) {
+//				println("Failed to create web server instance: ${e.message}")
+//				throw e
+//			}
 		}
 	}
 

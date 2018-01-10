@@ -25,18 +25,18 @@ class WebServerTest {
         server.stop()
     }
 
-//	@Test
-//	fun `should accept client connections`() {
-//		val socket = Socket("localhost", server.getPort())
-//		Thread.sleep(1000)
-//		socket.close()
-//	}
+	@Test
+	fun `should accept client connections`() {
+		val socket = Socket("localhost", server.getPort())
+		Thread.sleep(1000)
+		socket.close()
+	}
 
-//	@Test
-//	fun `should happen nothing wrong when calling stop without start`() {
-//		server.stop()
-//		server.stop()
-//	}
+	@Test
+	fun `should happen nothing wrong when calling stop without start`() {
+		server.stop()
+		server.stop()
+	}
 
 	@Test
 	fun `should return hello world`() {
@@ -67,20 +67,19 @@ class WebServerTest {
 		}
 	}
 
-//	@Test
-//	fun `should return bad request`() {
-//		Socket("localhost", server.getPort()).use { socket ->
-//			val writer = socket.getOutputStream().writer()
-//			writer.write("very /bad request\r\n\r\n")
-////			writer.write("GET /ana HTTP/1.1\r\n\r\n")
-//			writer.flush()
-//
-//			val reader = socket.getInputStream()
-//			val response = reader.bufferedReader().readText()
-//			Assert.assertTrue(response.contains("400"))
-//			socket.close()
-//		}
-//	}
+	@Test
+	fun `should return bad request`() {
+		Socket("localhost", server.getPort()).use { socket ->
+			val writer = socket.getOutputStream().writer()
+			writer.write("very /bad request\r\n\r\n")
+			writer.flush()
+
+			val reader = socket.getInputStream()
+			val response = reader.bufferedReader().readLine()
+			Assert.assertTrue(response.contains("400"))
+			socket.close()
+		}
+	}
 }
 
 class RouteContentHelloWorld : RouteContent {
@@ -91,7 +90,7 @@ class RouteContentHelloWorld : RouteContent {
 		return HttpResponse("HTTP/1.1",
 				200,
 				"OK",
-				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
+				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
 				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
 	}
 }
@@ -104,7 +103,7 @@ class RouteContentHelloAna : RouteContent {
 		return HttpResponse("HTTP/1.1",
 				200,
 				"OK",
-				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
+				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
 				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
 	}
 }
@@ -117,7 +116,7 @@ class RouteContentHtml : RouteContent {
 		return HttpResponse("HTTP/1.1",
 				200,
 				"OK",
-				mapOf(Pair("Content-Lenght", "${bodyMessage.length}"), Pair("Content-Type", contentType.type)),
+				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
 				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
 	}
 }

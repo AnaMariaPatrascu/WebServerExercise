@@ -14,12 +14,10 @@ class HttpRequestParser : RequestParser {
 
 		val body = input
 
-		// try to avoid !!
-		return HttpRequest(firstLine!!.method, firstLine.uri, firstLine.httpVersion, headers, body)
+		return HttpRequest(firstLine.method, firstLine.uri, firstLine.httpVersion, headers, body)
 	}
 
-	// does this method have the correct return type?
-	private fun parseFirstLine(input: InputStream): FirstRequestLine? {
+	private fun parseFirstLine(input: InputStream): FirstRequestLine {
 		try {
 			val firstLine = input.readNextLine()
 			if (firstLine.isEmpty()) {
@@ -30,7 +28,12 @@ class HttpRequestParser : RequestParser {
 				throw HttpRequestParseException("First request line should contain three parameters!")
 			}
 
-			val method = HttpMethod.valueOf(items[0])
+			val method = try {
+				HttpMethod.valueOf(items[0])
+			}catch (ie: IllegalArgumentException){
+				throw HttpRequestParseException("Http method is not valid!")
+			}
+
 			val uri = items[1]
 			val httpVersion = items[2]
 
@@ -59,23 +62,12 @@ class HttpRequestParser : RequestParser {
 		}
 		return headers
 	}
-
-//	private fun parseBody(reader: BufferedReader, length: Int): String? {
-//		var body: String? = null
-//		if (length > 0) {
-//			val content = CharArray(length)
-//			reader.read(content)
-//
-//			body = String(content)
-//		}
-//		return body
-//	}
 }
 
 fun InputStream.readNextLine(): String {
 	var result = ""
 	while (!result.contains("\n")) {
-		result = "$result${this.read().toChar()}" // character encoding?
+		result = "$result${this.read().toChar()}"
 	}
 	return result.removeSuffix("\n").removeSuffix("\r")
 }

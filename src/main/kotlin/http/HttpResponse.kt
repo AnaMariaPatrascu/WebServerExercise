@@ -9,11 +9,8 @@ class HttpResponse(private val httpVersion: String,
                    private val body: InputStream?) {
 
     fun writeTo(output: OutputStream) {
-        with(output.writer()) {
-            write(toHttpString())
-            body?.copyTo(output)
-            flush()
-        }
+        output.write(toHttpString().toByteArray())
+        body?.copyTo(output)
     }
 
     private fun toHttpString(): String {

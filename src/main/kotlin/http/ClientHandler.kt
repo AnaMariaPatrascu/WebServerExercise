@@ -15,9 +15,9 @@ class ClientHandler(private val socket: Socket,
 			val request = requestParser.parseRequest(socket.getInputStream())
 			handler.handleRequest(request)
 		} catch (e: HttpRequestParseException){
-			HttpResponse("HTTP/1.1", 400, "Bad Request", mapOf(), null)
+			HttpResponse(HTTP_VERSION, 400, "Bad Request", mapOf(), null)
 		} catch (e: Exception) {
-			HttpResponse("HTTP/1.1", 500, "Internal Server Error", mapOf(), null)
+			HttpResponse(HTTP_VERSION, 500, "Internal Server Error", mapOf(), null)
 		}
 
 		try {

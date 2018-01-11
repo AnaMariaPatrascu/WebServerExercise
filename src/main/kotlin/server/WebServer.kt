@@ -7,31 +7,30 @@ import java.util.concurrent.*
 
 const val DEFAULT_PORT = 8080
 
-class WebServer(port: Int = DEFAULT_PORT,
+class WebServer(private val serverSocket: ServerSocket,
                 private val requestParser: RequestParser,
                 private val requestHandler: RequestHandler) {
 
 	private val executor: ExecutorService = Executors.newCachedThreadPool()
 
-	// how do we deals with errors when we cannot open the server socket?
-	// we should process common errors and give the user a tip how to resolve these issues
-	// ==> i think user should surround crate() call with try catch....but I am not sure if is the best approach...
-	private var serverSocket: ServerSocket = ServerSocket(port)
-
 	companion object: KLogging() {
-		fun create(port: Int, routes: List<Pair<String, RouteContent>>): WebServer {
+		fun create(port: Int?, routes: List<Pair<String, RouteContent>>): WebServer {
 			val parser = HttpRequestParser()
 
 			val router = HttpRouter()
 			routes.forEach { router.addNewRoute(it.first, it.second) }
-
 			val handler = HttpRequestHandler(router)
 
+			val serverSocket = try {
+				ServerSocket(port ?: DEFAULT_PORT)
+			}catch (e: Exception){
+				throw Exception("Failed to create server socket at port ${port ?: DEFAULT_PORT}!", e)
+			}
+
 			try{
-				return WebServer(port, requestParser = parser, requestHandler = handler)
+				return WebServer(serverSocket, requestParser = parser, requestHandler = handler)
 			}catch (e: Exception) {
-				logger.error {"Failed to create web server instance: ${e.message}"}
-				throw e
+				throw Exception("Failed to create web server instance!", e)
 			}
 		}
 	}
@@ -41,6 +40,7 @@ class WebServer(port: Int = DEFAULT_PORT,
 		return serverSocket.localPort
 	}
 
+	@Synchronized
 	fun start() {
 		// is this on purpose?
 		// if `start()` is called multiple times, it executes multiple threads calling the same accept method
@@ -52,13 +52,16 @@ class WebServer(port: Int = DEFAULT_PORT,
 				} catch (e: Exception) {
 					// we should check whether the exception was triggered by closing the server socket
 					// we shouldn't pollute the log with exceptions if it's a normal use case
-					logger.error{"Something went wrong: $e"}
-					// --> use a logger...
+					if(!serverSocket.isClosed){
+						logger.error{"Something went wrong: $e"}
+					}
+
 				}
 			}
 		}
 	}
 
+	@Synchronized
 	fun stop() {
 		try {
 			serverSocket.close()

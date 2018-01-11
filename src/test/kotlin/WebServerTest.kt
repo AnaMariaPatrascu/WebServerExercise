@@ -10,7 +10,7 @@ class WebServerTest {
 
     @Before
     fun setUp() {
-		val port = 8087
+		val port = 0
 		val routes = listOf("/hello" to RouteContentHelloWorld(),
 				"/ana" to RouteContentHelloAna(),
 				"/html" to RouteContentHtml())
@@ -41,7 +41,7 @@ class WebServerTest {
 	fun `should return hello world`() {
 		Socket("localhost", server.getPort()).use { socket ->
 			val writer = socket.getOutputStream().writer()
-			writer.write("GET /hello HTTP/1.1\r\n\r\n")
+			writer.write("GET /hello $HTTP_VERSION\r\n\r\n")
 			writer.flush()
 
 			val reader = socket.getInputStream()
@@ -56,7 +56,7 @@ class WebServerTest {
 	fun `should return hello name`() {
 		Socket("localhost", server.getPort()).use { socket ->
 			val writer = socket.getOutputStream().writer()
-			writer.write("GET /ana HTTP/1.1\r\n\r\n")
+			writer.write("GET /ana $HTTP_VERSION\r\n\r\n")
 			writer.flush()
 
 			val reader = socket.getInputStream()
@@ -87,10 +87,10 @@ class RouteContentHelloWorld : RouteContent {
 		val bodyMessage = "Hello, World!"
 		val contentType = ContentType.PLAIN
 
-		return HttpResponse("HTTP/1.1",
+		return HttpResponse(HTTP_VERSION,
 				200,
 				"OK",
-				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
+				mapOf(CONTENT_LENGTH to "${bodyMessage.length}", CONTENT_TYPE to contentType.type),
 				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.ISO_8859_1)))
 	}
 }
@@ -100,10 +100,10 @@ class RouteContentHelloAna : RouteContent {
 		val bodyMessage = "Hello, Ana!"
 		val contentType = ContentType.PLAIN
 
-		return HttpResponse("HTTP/1.1",
+		return HttpResponse(HTTP_VERSION,
 				200,
 				"OK",
-				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
+				mapOf(CONTENT_LENGTH to "${bodyMessage.length}", CONTENT_TYPE to contentType.type),
 				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.ISO_8859_1)))
 	}
 }
@@ -113,10 +113,10 @@ class RouteContentHtml : RouteContent {
 		val bodyMessage = "<html><body><h1>Hello, World!</h1></body></html>"
 		val contentType = ContentType.HTMl
 
-		return HttpResponse("HTTP/1.1",
+		return HttpResponse(HTTP_VERSION,
 				200,
 				"OK",
-				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
+				mapOf(CONTENT_LENGTH to "${bodyMessage.length}", CONTENT_TYPE to contentType.type),
 				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.ISO_8859_1)))
 	}
 }

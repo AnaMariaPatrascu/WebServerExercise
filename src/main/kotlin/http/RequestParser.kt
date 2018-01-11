@@ -1,6 +1,5 @@
 package http
 
-import mu.*
 import java.io.*
 
 interface RequestParser {
@@ -38,7 +37,7 @@ class HttpRequestParser : RequestParser {
 			val uri = items[1]
 			val httpVersion = items[2]
 
-			if (httpVersion != "HTTP/1.1") {
+			if (httpVersion != HTTP_VERSION) {
 				// actually it could be 1.0, couldn't it? (theoretically even 2.0 even though nobody implemented support for it without TLS)
 				throw HttpRequestParseException("$httpVersion is not a valid http version!")
 			}

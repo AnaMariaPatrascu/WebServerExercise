@@ -8,12 +8,11 @@ class RouteContentHelloWorld : RouteContent {
 		val bodyMessage = "Hello, World!"
 		val contentType = ContentType.PLAIN
 
-		return HttpResponse("HTTP/1.1",
+		return HttpResponse(HTTP_VERSION,
 				200,
 				"OK",
-				// typo! maybe typed API so this cannot happen? (this is also true for other parts of this constructor)
-				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
-				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
+				mapOf(CONTENT_LENGTH to "${bodyMessage.length}", CONTENT_TYPE to contentType.type),
+				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.ISO_8859_1)))
 	}
 }
 
@@ -22,11 +21,11 @@ class RouteContentHelloAna : RouteContent {
 		val bodyMessage = "Hello, Ana!"
 		val contentType = ContentType.PLAIN
 
-		return HttpResponse("HTTP/1.1",
+		return HttpResponse(HTTP_VERSION,
 				200,
 				"OK",
-				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
-				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
+				mapOf(CONTENT_LENGTH to "${bodyMessage.length}", CONTENT_TYPE to contentType.type),
+				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.ISO_8859_1)))
 	}
 }
 
@@ -35,10 +34,10 @@ class RouteContentHtml : RouteContent {
 		val bodyMessage = "<html><body><h1>Hello, World!</h1></body></html>"
 		val contentType = ContentType.HTMl
 
-		return HttpResponse("HTTP/1.1",
+		return HttpResponse(HTTP_VERSION,
 				200,
 				"OK",
-				mapOf("Content-Length" to "${bodyMessage.length}", "Content-Type" to contentType.type),
-				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.UTF_8)))
+				mapOf(CONTENT_LENGTH to "${bodyMessage.length}", CONTENT_TYPE to contentType.type),
+				ByteArrayInputStream(bodyMessage.toByteArray(Charsets.ISO_8859_1)))
 	}
 }

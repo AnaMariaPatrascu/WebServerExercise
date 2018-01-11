@@ -9,11 +9,5 @@ fun main(args: Array<String>) {
 											listOf("/hello" to RouteContentHelloWorld(),
 													"/ana" to RouteContentHelloAna(),
 													"/html" to RouteContentHtml()))
-//	try{
-//
-//	}catch (e: Exception) {
-//		println("Failed to create web server instance: ${e.message}")
-//		null
-//	}
 	server.start()
 }

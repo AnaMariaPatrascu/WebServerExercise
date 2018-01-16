@@ -13,6 +13,8 @@ class WebServer(private val serverSocket: ServerSocket,
 
 	private val executor: ExecutorService = Executors.newCachedThreadPool()
 
+	private var started = false
+
 	companion object: KLogging() {
 		fun create(port: Int?, routes: List<Pair<String, RouteContent>>): WebServer {
 			val parser = HttpRequestParser()
@@ -44,6 +46,9 @@ class WebServer(private val serverSocket: ServerSocket,
 	fun start() {
 		// is this on purpose?
 		// if `start()` is called multiple times, it executes multiple threads calling the same accept method
+		if (started) return
+		started = true
+
 		executor.execute {
 			while (!serverSocket.isClosed) {
 				try {
@@ -55,9 +60,10 @@ class WebServer(private val serverSocket: ServerSocket,
 					if(!serverSocket.isClosed){
 						logger.error{"Something went wrong: $e"}
 					}
-
 				}
 			}
+
+			logger.info("Server stopped!")
 		}
 	}
 

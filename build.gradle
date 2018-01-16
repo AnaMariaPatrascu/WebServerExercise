@@ -20,6 +20,7 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile group: 'io.github.microutils', name: 'kotlin-logging', version: '1.4.3'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta0'
     testCompile "junit:junit:4.12"
 }
 

@@ -19,6 +19,6 @@ class HttpRequest(val method: HttpMethod,
 
 	fun readBodyContent(): String {
 		val size = headers.get(CONTENT_LENGTH)?.toInt() ?: 0
-		return body.bufferedReader().readText().substring(0, size)
+		return body.bufferedReader().use { it.readText() }.substring(0, size)
 	}
 }

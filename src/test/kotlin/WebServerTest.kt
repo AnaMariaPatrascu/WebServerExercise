@@ -46,7 +46,7 @@ class WebServerTest {
 
 			val reader = socket.getInputStream()
 
-			val response = reader.bufferedReader().readText()
+			val response = reader.bufferedReader().use { it.readText() }
 			Assert.assertTrue(response.contains("Hello, World!"))
 			socket.close()
 		}
@@ -60,7 +60,7 @@ class WebServerTest {
 			writer.flush()
 
 			val reader = socket.getInputStream()
-			val response = reader.bufferedReader().readText()
+			val response = reader.bufferedReader().use { it.readText() }
 			Assert.assertTrue(response.contains("Hello, Ana!"))
 			socket.close()
 		}
@@ -74,7 +74,7 @@ class WebServerTest {
 			writer.flush()
 
 			val reader = socket.getInputStream()
-			val response = reader.bufferedReader().readLine()
+			val response = reader.bufferedReader().use { it.readLine() }
 			Assert.assertTrue(response.contains("400"))
 			socket.close()
 		}

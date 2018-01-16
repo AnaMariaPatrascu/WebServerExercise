@@ -9,17 +9,19 @@ interface RequestParser {
 class HttpRequestParser : RequestParser {
 
 	override fun parseRequest(input: InputStream): HttpRequest {
-		val firstLine = parseFirstLine(input)
-		val headers = parseHeaders(input)
+		val reader = input.reader(Charsets.ISO_8859_1)
 
-		val body = input
+		val firstLine = parseFirstLine(reader)
+		val headers = parseHeaders(reader)
+
+		val body = HttpBodyInputStream(reader, headers[CONTENT_LENGTH]?.toIntOrNull() ?: 0)
 
 		return HttpRequest(firstLine.method, firstLine.uri, firstLine.httpVersion, headers, body)
 	}
 
-	private fun parseFirstLine(input: InputStream): FirstRequestLine {
+	private fun parseFirstLine(reader: Reader): FirstRequestLine {
 		try {
-			val firstLine = input.readNextLine()
+			val firstLine = reader.readNextLine()
 			if (firstLine.isEmpty()) {
 				throw HttpRequestParseException("Request first line is missing!")
 			}
@@ -39,7 +41,7 @@ class HttpRequestParser : RequestParser {
 
 			if (httpVersion != HTTP_VERSION) {
 				// actually it could be 1.0, couldn't it? (theoretically even 2.0 even though nobody implemented support for it without TLS)
-				throw HttpRequestParseException("$httpVersion is not a valid http version!")
+				throw HttpRequestParseException("$httpVersion is not supported! Only $HTTP_VERSION supported!")
 			}
 
 			return FirstRequestLine(method, uri, httpVersion)
@@ -48,9 +50,9 @@ class HttpRequestParser : RequestParser {
 		}
 	}
 
-	private fun parseHeaders(input: InputStream): Map<String, String> {
+	private fun parseHeaders(reader: Reader): Map<String, String> {
 		val headers = mutableMapOf<String, String>()
-		var line = input.readNextLine()
+		var line = reader.readNextLine()
 		while (!line.isBlank()) {
 			val elements = line.split(":".toRegex(), 2)
 			if (elements.size < 2) {
@@ -58,18 +60,21 @@ class HttpRequestParser : RequestParser {
 			}
 
 			headers.put(elements[0], elements[1])
-			line = input.readNextLine()
+			line = reader.readNextLine()
 		}
 		return headers
 	}
 }
 
-fun InputStream.readNextLine(): String {
+fun Reader.readNextLine(): String {
 	var result = ""
 	while (!result.contains("\n")) {
-		result = "$result${this.read().toChar()}"   //TODO how should I do it using ISO encoding??
-				//read().toChar(Charsets.ISO_8859_1)}"
+		val read = this.read()
+		if (read == -1) break
+
+		result += read.toChar()
 	}
+
 	return result.removeSuffix("\n").removeSuffix("\r")
 }
 
@@ -78,3 +83,17 @@ data class FirstRequestLine(val method: HttpMethod,
 							val httpVersion: String)
 
 class HttpRequestParseException(override var message: String) : RuntimeException()
+
+
+private class HttpBodyInputStream(private val delegate: Reader,
+								  private var contentLength: Int) : InputStream() {
+
+	override fun read(): Int {
+		if (contentLength <= 0){
+			return -1
+		}
+		contentLength--
+		return delegate.read()
+	}
+
+}

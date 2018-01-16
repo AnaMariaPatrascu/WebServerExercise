@@ -9,7 +9,7 @@ class HttpResponse(private val httpVersion: String,
                    private val body: InputStream?) {
 
     fun writeTo(output: OutputStream) {
-        output.write(toHttpString().toByteArray())
+        output.write(toHttpString().toByteArray(Charsets.ISO_8859_1))
         body?.copyTo(output)
     }
 
